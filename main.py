@@ -9,7 +9,7 @@ import json
 
 pygame.init()
 inicializarBancoDeDados()
-tamanho = (800,600)
+tamanho = (1000,700)
 relogio = pygame.time.Clock()
 tela = pygame.display.set_mode( tamanho ) 
 pygame.display.set_caption("Iron Man do Marcão")
@@ -104,13 +104,13 @@ def jogar():
         
         if posicaoXPersona < 0 :
             posicaoXPersona = 15
-        elif posicaoXPersona >550:
-            posicaoXPersona = 540
+        elif posicaoXPersona >750:
+            posicaoXPersona = 740
             
         if posicaoYPersona < 0 :
             posicaoYPersona = 15
-        elif posicaoYPersona > 473:
-            posicaoYPersona = 463
+        elif posicaoYPersona > 573:
+            posicaoYPersona = 563
         
             
         tela.fill(branco)
