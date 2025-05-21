@@ -28,6 +28,36 @@ fonteMenu = pygame.font.SysFont("comicsans",18)
 fonteMorte = pygame.font.SysFont("arial",120)
 pygame.mixer.music.load("assets/ironsound.mp3")
 
+#Função da tela de boas vindas
+def boas_vindas(nome):
+    mostrando = True
+    while mostrando:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                quit()
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                if botao_jogar.collidepoint(evento.pos):
+                    mostrando = False
+
+        tela.fill(preto)
+
+        titulo = fonteMorte.render(f"Bem-vindo, {nome}!", True, branco)
+        explicacao1 = fonteMenu.render("Você deve desviar dos mísseis que caem do céu.", True, branco)
+        explicacao2 = fonteMenu.render("Use as setas do teclado para se mover.", True, branco)
+        explicacao3 = fonteMenu.render("Tente alcançar a maior pontuação possível!", True, branco)
+
+        tela.blit(titulo, (100, 100))
+        tela.blit(explicacao1, (100, 250))
+        tela.blit(explicacao2, (100, 280))
+        tela.blit(explicacao3, (100, 310))
+
+        botao_jogar = pygame.draw.rect(tela, branco, (350, 400, 300, 50), border_radius=15)
+        texto_botao = fonteMenu.render("Começar o Jogo", True, preto)
+        tela.blit(texto_botao, (450, 415))
+
+        pygame.display.update()
+        relogio.tick(60)
+
 def jogar():
     largura_janela = 300
     altura_janela = 50
@@ -281,32 +311,3 @@ def dead():
 start()
 
 
-#Função da tela de boas vindas
-def boas_vindas(nome):
-    mostrando = True
-    while mostrando:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                quit()
-            elif evento.type == pygame.MOUSEBUTTONDOWN:
-                if botao_jogar.collidepoint(evento.pos):
-                    mostrando = False
-
-        tela.fill(preto)
-
-        titulo = fonteMorte.render(f"Bem-vindo, {nome}!", True, branco)
-        explicacao1 = fonteMenu.render("Você deve desviar dos mísseis que caem do céu.", True, branco)
-        explicacao2 = fonteMenu.render("Use as setas do teclado para se mover.", True, branco)
-        explicacao3 = fonteMenu.render("Tente alcançar a maior pontuação possível!", True, branco)
-
-        tela.blit(titulo, (100, 100))
-        tela.blit(explicacao1, (100, 250))
-        tela.blit(explicacao2, (100, 280))
-        tela.blit(explicacao3, (100, 310))
-
-        botao_jogar = pygame.draw.rect(tela, branco, (350, 400, 300, 50), border_radius=15)
-        texto_botao = fonteMenu.render("Começar o Jogo", True, preto)
-        tela.blit(texto_botao, (450, 415))
-
-        pygame.display.update()
-        relogio.tick(60)
