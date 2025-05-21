@@ -105,6 +105,7 @@ def jogar():
     pygame.mixer.Sound.play(missileSound)
     pygame.mixer.music.play(-1)
     pontos = 0
+    pausado = False
     larguraPersona = 250
     alturaPersona = 127
     larguaMissel  = 50
@@ -114,22 +115,34 @@ def jogar():
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_RIGHT:
-                movimentoXPersona = 15
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_LEFT:
-                movimentoXPersona = -15
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_RIGHT:
-                movimentoXPersona = 0
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_LEFT:
-                movimentoXPersona = 0
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_UP:
-                movimentoYPersona = -15
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_DOWN:
-                movimentoYPersona = 15
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_UP:
-                movimentoYPersona = 0
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_DOWN:
-                movimentoYPersona = 0
+            elif evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_SPACE:
+                    pausado = not pausado  # Alterna entre pausado e não pausado
+
+                if not pausado:  # Só permite movimento se não estiver pausado
+                    if evento.key == pygame.K_RIGHT:
+                        movimentoXPersona = 15
+                    elif evento.key == pygame.K_LEFT:
+                        movimentoXPersona = -15
+                    elif evento.key == pygame.K_UP:
+                        movimentoYPersona = -15
+                    elif evento.key == pygame.K_DOWN:
+                        movimentoYPersona = 15
+
+            elif evento.type == pygame.KEYUP:
+                if not pausado:  # Impede travamento de movimento durante o pause
+                    if evento.key == pygame.K_RIGHT or evento.key == pygame.K_LEFT:
+                        movimentoXPersona = 0
+                    elif evento.key == pygame.K_UP or evento.key == pygame.K_DOWN:
+                        movimentoYPersona = 0
+
+        if pausado:
+            texto_pause = fonteMorte.render("PAUSE", True, branco)
+            tela.blit(texto_pause, (300, 300))  # Centraliza na tela (ajuste se necessário)
+            pygame.display.update()
+            relogio.tick(60)
+            continue
+
                 
         posicaoXPersona = posicaoXPersona + movimentoXPersona            
         posicaoYPersona = posicaoYPersona + movimentoYPersona            
