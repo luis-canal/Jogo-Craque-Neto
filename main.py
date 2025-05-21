@@ -174,6 +174,8 @@ def jogar():
             
         tela.blit( missel, (posicaoXMissel, posicaoYMissel) )
         
+        textoPressPause = fonteMenu.render("Press 'Space' to pause the game", True, branco)
+        tela.blit(textoPressPause, (15,35))
         texto = fonteMenu.render("Pontos: "+str(pontos), True, branco)
         tela.blit(texto, (15,15))
         
