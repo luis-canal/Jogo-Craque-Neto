@@ -189,13 +189,10 @@ def jogar():
         if  len( list( set(pixelsMisselY).intersection(set(pixelsPersonaY))) ) > dificuldade:
             if len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )  > dificuldade:
                 escreverDados(nome, pontos)
-                dead()
-                
-            else:
-                print("Ainda Vivo, mas por pouco!")
-        else:
-            print("Ainda Vivo")
-        
+                dead(nome, pontos)
+                return
+            
+       
         pygame.display.update()
         relogio.tick(60)
 
@@ -250,83 +247,63 @@ def start():
         relogio.tick(60)
 
 
-def dead():
+def ler_ultimos_registros(caminho_arquivo="dados.json", quantidade=5):
+    try:
+        with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
+            dados = json.load(arquivo)
+            # Pega os últimos 'quantidade' registros
+            return dados[-quantidade:]
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Caso o arquivo não exista ou esteja vazio/corrompido
+        return []
+
+def dead(nome, pontos):
     pygame.mixer.music.stop()
     pygame.mixer.Sound.play(explosaoSound)
-    larguraButtonStart = 150
-    alturaButtonStart  = 40
-    larguraButtonQuit = 150
-    alturaButtonQuit  = 40
+
+    with open("log.dat", "r") as arquivo:
+        log_partidas = json.load(arquivo)
     
+    data = log_partidas[nome][1]
+    hora = log_partidas[nome][2]
+
+    fonte_grande = pygame.font.SysFont("Arial", 64)
+    fonte_media = pygame.font.SysFont("Arial", 20)
+    fonte_pequena = pygame.font.SysFont("Arial", 28)
     
-    root = tk.Tk()
-    root.title("Tela da Morte")
-
-    # Adiciona um título na tela
-    label = tk.Label(root, text="Log das Partidas", font=("Arial", 16))
-    label.pack(pady=10)
-
-    # Criação do Listbox para mostrar o log
-    listbox = tk.Listbox(root, width=50, height=10, selectmode=tk.SINGLE)
-    listbox.pack(pady=20)
-
-    # Adiciona o log das partidas no Listbox
-    log_partidas = open("log.dat", "r").read()
-    log_partidas = json.loads(log_partidas)
-    for chave in log_partidas:
-        entrada = log_partidas[chave]
-        pontos = entrada[0]
-        data = entrada[1]
-        hora = entrada[2] if len(entrada) > 2 else "??:??:??"
-        listbox.insert(tk.END, f"Pontos: {pontos} em {data} às {hora} - Nickname: {chave}")
-
-    root.mainloop()
-    while True:
+    ultimos_logs = list(log_partidas.items())[-5:]
+    
+    dead_screen = True
+    while dead_screen:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
-            elif evento.type == pygame.MOUSEBUTTONDOWN:
-                if startButton.collidepoint(evento.pos):
-                    larguraButtonStart = 140
-                    alturaButtonStart  = 35
-                if quitButton.collidepoint(evento.pos):
-                    larguraButtonQuit = 140
-                    alturaButtonQuit  = 35
+            elif evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_RETURN:
+                    dead_screen = False  # Sai da tela de morte e volta para start() / jogar()
 
-                
-            elif evento.type == pygame.MOUSEBUTTONUP:
-                # Verifica se o clique foi dentro do retângulo
-                if startButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonStart = 150
-                    alturaButtonStart  = 40
-                    jogar()
-                if quitButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonQuit = 150
-                    alturaButtonQuit  = 40
-                    quit()
-                    
+        tela.fill(preto)
+        tela.blit(fundoDead, (0,0))
         
-            
-            
-        tela.fill(branco)
-        tela.blit(fundoDead, (0,0) )
-
+        exibir_texto_centralizado(tela, f"Nome: {nome}", fonteMenu, branco, 1000, 680)
+        exibir_texto_centralizado(tela, f"Pontos: {pontos}", fonteMenu, branco, 1000, 730)
+        exibir_texto_centralizado(tela, "GAME OVER", fonteMorte, branco, 1000, 500 )
+        exibir_texto_centralizado(tela, "Pressione ENTER para jogar novamente", fonteMenu , branco, 1000, 816)
         
-        startButton = pygame.draw.rect(tela, branco, (10,10, larguraButtonStart, alturaButtonStart), border_radius=15)
-        startTexto = fonteMenu.render("Iniciar Game", True, preto)
-        tela.blit(startTexto, (25,12))
         
-        quitButton = pygame.draw.rect(tela, branco, (10,60, larguraButtonQuit, alturaButtonQuit), border_radius=15)
-        quitTexto = fonteMenu.render("Sair do Game", True, preto)
-        tela.blit(quitTexto, (25,62))
-
+        y_base = 480
+        tela.blit(fonte_pequena.render("Últimos 5 registros:", True, (255, 255, 0)), (50, y_base))
+        for i, (nick, dados) in enumerate(ultimos_logs):
+            pontos_registro, data_registro, hora_registro = dados
+            texto_log = f"{nick} - {pontos_registro} pts em {data_registro} às {hora_registro}"
+            texto_render = fonte_media.render(texto_log, True, (255, 255, 255))
+            tela.blit(texto_render, (50, y_base + 30 + i * 30))
 
         pygame.display.update()
         relogio.tick(60)
 
 
-start()
+if __name__ == "__main__":
+    start()
 
 
