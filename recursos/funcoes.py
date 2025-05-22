@@ -33,7 +33,7 @@ def escreverDados(nome, pontos):
     hora_br = agora.strftime("%H:%M:%S")
     dadosDict[nome] = (pontos, data_br, hora_br)
     
-    banco = open("base.atitus","w")
+    banco = open("log.dat","w")
     banco.write(json.dumps(dadosDict))
     banco.close()
     
