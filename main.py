@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import messagebox
 from recursos.funcoes import inicializarBancoDeDados
 from recursos.funcoes import escreverDados
+from recursos.funcaoUtil import exibir_texto_centralizado
 import json
 
 pygame.init()
@@ -137,8 +138,7 @@ def jogar():
                         movimentoYPersona = 0
 
         if pausado:
-            texto_pause = fonteMorte.render("PAUSE", True, branco)
-            tela.blit(texto_pause, (300, 300))  # Centraliza na tela (ajuste se necessário)
+            exibir_texto_centralizado(tela, "PAUSE", fonteMorte, branco, 1000, 700)
             pygame.display.update()
             relogio.tick(60)
             continue
