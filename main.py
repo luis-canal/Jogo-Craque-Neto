@@ -18,10 +18,16 @@ icone  = pygame.image.load("assets/icone.png")
 pygame.display.set_icon(icone)
 branco = (255,255,255)
 preto = (0, 0 ,0 )
-iron = pygame.image.load("assets/iron.png")
-fundoStart = pygame.image.load("assets/fundoStartCN.jpg")
-fundoJogo = pygame.image.load("assets/fundoJogoCN.png")
-fundoDead = pygame.image.load("assets/fundoDead.png")
+craqueNeto = pygame.image.load("assets/craqueNeto.png")
+craqueNeto = pygame.transform.scale(craqueNeto, (256, 384))
+fundoStart = pygame.image.load("assets/fundoStart.jpg")
+fundoStart = pygame.transform.scale(fundoStart, (1000, 700))
+fundoJogo = pygame.image.load("assets/fundoJogo.jpg")
+fundoJogo = pygame.transform.scale(fundoJogo, (1000, 700))
+fundoDead = pygame.image.load("assets/fundoDead.jpg")
+fundoDead = pygame.transform.scale(fundoDead, (1000, 700))
+fundoBoasVindas = pygame.image.load("assets/fundoBoasVindas.jpg")
+fundoBoasVindas = pygame.transform.scale(fundoBoasVindas, (1000, 700))
 missel = pygame.image.load("assets/missile.png")
 missileSound = pygame.mixer.Sound("assets/missile.wav")
 explosaoSound = pygame.mixer.Sound("assets/explosao.wav")
@@ -41,6 +47,7 @@ def boas_vindas(nome):
                     mostrando = False
 
         tela.fill(preto)
+        tela.blit(fundoBoasVindas, (0,0))
 
         titulo = fonteMorte.render(f"Bem-vindo, {nome}!", True, branco)
         explicacao1 = fonteMenu.render("Você deve desviar dos mísseis que caem do céu.", True, branco)
@@ -161,7 +168,7 @@ def jogar():
         tela.fill(branco)
         tela.blit(fundoJogo, (0,0) )
         #pygame.draw.circle(tela, preto, (posicaoXPersona,posicaoYPersona), 40, 0 )
-        tela.blit( iron, (posicaoXPersona, posicaoYPersona) )
+        tela.blit( craqueNeto, (posicaoXPersona, posicaoYPersona) )
         
         posicaoYMissel = posicaoYMissel + velocidadeMissel
         if posicaoYMissel > 600:
