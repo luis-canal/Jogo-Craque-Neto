@@ -31,8 +31,8 @@ fundoBoasVindas = pygame.transform.scale(fundoBoasVindas, (1000, 700))
 missel = pygame.image.load("assets/missile.png")
 missileSound = pygame.mixer.Sound("assets/missile.wav")
 explosaoSound = pygame.mixer.Sound("assets/explosao.wav")
-fonteMenu = pygame.font.SysFont("comicsans",18)
-fonteMorte = pygame.font.SysFont("arial",120)
+fonteMenu = pygame.font.Font("assets/Pixellari.ttf",18)
+fonteMorte = pygame.font.Font("assets/Pixellari.ttf",120)
 pygame.mixer.music.load("assets/ironsound.mp3")
 
 #Função da tela de boas vindas
@@ -49,15 +49,13 @@ def boas_vindas(nome):
         tela.fill(preto)
         tela.blit(fundoBoasVindas, (0,0))
 
-        titulo = fonteMorte.render(f"Bem-vindo, {nome}!", True, branco)
         explicacao1 = fonteMenu.render("Você deve desviar dos mísseis que caem do céu.", True, branco)
         explicacao2 = fonteMenu.render("Use as setas do teclado para se mover.", True, branco)
         explicacao3 = fonteMenu.render("Tente alcançar a maior pontuação possível!", True, branco)
 
-        tela.blit(titulo, (100, 100))
-        tela.blit(explicacao1, (100, 250))
-        tela.blit(explicacao2, (100, 280))
-        tela.blit(explicacao3, (100, 310))
+        tela.blit(explicacao1, (100, 280))
+        tela.blit(explicacao2, (100, 310))
+        tela.blit(explicacao3, (100, 340))
 
         botao_jogar = pygame.draw.rect(tela, branco, (350, 400, 300, 50), border_radius=15)
         texto_botao = fonteMenu.render("Começar o Jogo", True, preto)
@@ -244,11 +242,11 @@ def start():
 
         startButton = pygame.draw.rect(tela, branco, (10,10, larguraButtonStart, alturaButtonStart), border_radius=15)
         startTexto = fonteMenu.render("Iniciar Game", True, preto)
-        tela.blit(startTexto, (25,12))
+        tela.blit(startTexto, (25,20))
         
         quitButton = pygame.draw.rect(tela, branco, (10,60, larguraButtonQuit, alturaButtonQuit), border_radius=15)
         quitTexto = fonteMenu.render("Sair do Game", True, preto)
-        tela.blit(quitTexto, (25,62))
+        tela.blit(quitTexto, (25,70))
         
         pygame.display.update()
         relogio.tick(60)
@@ -292,10 +290,9 @@ def dead(nome, pontos):
         tela.fill(preto)
         tela.blit(fundoDead, (0,0))
         
-        exibir_texto_centralizado(tela, f"Nome: {nome}", fonteMenu, branco, 1000, 680)
-        exibir_texto_centralizado(tela, f"Pontos: {pontos}", fonteMenu, branco, 1000, 730)
-        exibir_texto_centralizado(tela, "GAME OVER", fonteMorte, branco, 1000, 500 )
-        exibir_texto_centralizado(tela, "Pressione ENTER para jogar novamente", fonteMenu , branco, 1000, 816)
+        exibir_texto_centralizado(tela, f"Nome: {nome}", fonteMenu, branco, 1000, 380)
+        exibir_texto_centralizado(tela, f"Pontos: {pontos}", fonteMenu, branco, 1000, 430)
+        exibir_texto_centralizado(tela, "Pressione ENTER para jogar novamente", fonteMenu , branco, 1000, 516)
         
         
         y_base = 480
