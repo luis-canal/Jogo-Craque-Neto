@@ -274,8 +274,12 @@ def dead():
     log_partidas = open("base.atitus", "r").read()
     log_partidas = json.loads(log_partidas)
     for chave in log_partidas:
-        listbox.insert(tk.END, f"Pontos: {log_partidas[chave][0]} na data: {log_partidas[chave][1]} - Nickname: {chave}")  # Adiciona cada linha no Listbox
-    
+        entrada = log_partidas[chave]
+        pontos = entrada[0]
+        data = entrada[1]
+        hora = entrada[2] if len(entrada) > 2 else "??:??:??"
+        listbox.insert(tk.END, f"Pontos: {pontos} em {data} às {hora} - Nickname: {chave}")
+
     root.mainloop()
     while True:
         for evento in pygame.event.get():
