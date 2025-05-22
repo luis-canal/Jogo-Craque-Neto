@@ -271,7 +271,7 @@ def dead():
     listbox.pack(pady=20)
 
     # Adiciona o log das partidas no Listbox
-    log_partidas = open("base.atitus", "r").read()
+    log_partidas = open("log.dat", "r").read()
     log_partidas = json.loads(log_partidas)
     for chave in log_partidas:
         entrada = log_partidas[chave]
