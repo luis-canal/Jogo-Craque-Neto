@@ -18,8 +18,8 @@ icone  = pygame.image.load("recursos/assets/icone.png")
 pygame.display.set_icon(icone)
 branco = (255,255,255)
 preto = (0, 0 ,0 )
-craqueNeto = pygame.image.load("recursos/assets/craqueNeto.png")
-craqueNeto = pygame.transform.scale(craqueNeto, (256, 384))
+craqueNeto = pygame.image.load("recursos/assets/craqueNeto.png").convert_alpha()
+craqueNeto = pygame.transform.scale(craqueNeto, (112, 278))
 fundoStart = pygame.image.load("recursos/assets/fundoStart.jpg")
 fundoStart = pygame.transform.scale(fundoStart, (1000, 700))
 fundoJogo = pygame.image.load("recursos/assets/fundoJogo.jpg")
@@ -28,26 +28,38 @@ fundoDead = pygame.image.load("recursos/assets/fundoDead.jpg")
 fundoDead = pygame.transform.scale(fundoDead, (1000, 700))
 fundoBoasVindas = pygame.image.load("recursos/assets/fundoBoasVindas.jpg")
 fundoBoasVindas = pygame.transform.scale(fundoBoasVindas, (1000, 700))
-missel = pygame.image.load("recursos/assets/missile.png")
+missel = pygame.image.load("recursos/assets/missile.png").convert_alpha()
 missileSound = pygame.mixer.Sound("recursos/assets/missile.wav")
 explosaoSound = pygame.mixer.Sound("recursos/assets/explosao.wav")
 fonteMenu = pygame.font.Font("recursos/assets/Pixellari.ttf",18)
 fonteMorte = pygame.font.Font("recursos/assets/Pixellari.ttf",120)
 pygame.mixer.music.load("recursos/assets/ironsound.mp3")
+botao = pygame.image.load("recursos/assets/botao.png").convert_alpha()
+botao = pygame.transform.scale(botao, (100,50))
 
 #Função da tela de boas vindas
 def boas_vindas(nome):
     mostrando = True
+    clicando = False
+
+    x_botao, y_botao = 450, 400
+    largura, altura = 100, 50
+    rect_botao = pygame.Rect(x_botao, y_botao, largura, altura)
+
     while mostrando:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
             elif evento.type == pygame.MOUSEBUTTONDOWN:
-                if botao_jogar.collidepoint(evento.pos):
+                if rect_botao.collidepoint(evento.pos):
+                    clicando = True
+            elif evento.type == pygame.MOUSEBUTTONUP:
+                if clicando and rect_botao.collidepoint(evento.pos):
                     mostrando = False
+                clicando = False
 
         tela.fill(preto)
-        tela.blit(fundoBoasVindas, (0,0))
+        tela.blit(fundoBoasVindas, (0, 0))
 
         explicacao1 = fonteMenu.render("Você deve desviar dos mísseis que caem do céu.", True, branco)
         explicacao2 = fonteMenu.render("Use as setas do teclado para se mover.", True, branco)
@@ -57,9 +69,13 @@ def boas_vindas(nome):
         tela.blit(explicacao2, (100, 310))
         tela.blit(explicacao3, (100, 340))
 
-        botao_jogar = pygame.draw.rect(tela, branco, (350, 400, 300, 50), border_radius=15)
-        texto_botao = fonteMenu.render("Começar o Jogo", True, preto)
-        tela.blit(texto_botao, (450, 415))
+        if clicando:
+            botao_menor = pygame.transform.scale(botao, (int(largura * 0.95), int(altura * 0.95)))
+            tela.blit(botao_menor, (x_botao + 2.5, y_botao + 2.5))
+        else:
+            tela.blit(botao, (x_botao, y_botao))
+
+        exibir_texto_centralizado(tela, "Start", fonteMenu, preto, 1000, 850)
 
         pygame.display.update()
         relogio.tick(60)
@@ -201,53 +217,56 @@ def jogar():
         pygame.display.update()
         relogio.tick(60)
 
-
 def start():
-    larguraButtonStart = 150
-    alturaButtonStart  = 40
-    larguraButtonQuit = 150
-    alturaButtonQuit  = 40
-    
+    x_start, y_start = 450, 440
+    x_quit, y_quit = 450, 500
+    largura, altura = 100, 50
+
+    rect_start = pygame.Rect(x_start, y_start, largura, altura)
+    rect_quit = pygame.Rect(x_quit, y_quit, largura, altura)
+
+    clicando_start = False
+    clicando_quit = False
 
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
+
             elif evento.type == pygame.MOUSEBUTTONDOWN:
-                if startButton.collidepoint(evento.pos):
-                    larguraButtonStart = 140
-                    alturaButtonStart  = 35
-                if quitButton.collidepoint(evento.pos):
-                    larguraButtonQuit = 140
-                    alturaButtonQuit  = 35
+                if rect_start.collidepoint(evento.pos):
+                    clicando_start = True
+                elif rect_quit.collidepoint(evento.pos):
+                    clicando_quit = True
 
-                
             elif evento.type == pygame.MOUSEBUTTONUP:
-                # Verifica se o clique foi dentro do retângulo
-                if startButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonStart = 150
-                    alturaButtonStart  = 40
+                if clicando_start and rect_start.collidepoint(evento.pos):
                     jogar()
-                if quitButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonQuit = 150
-                    alturaButtonQuit  = 40
+                elif clicando_quit and rect_quit.collidepoint(evento.pos):
                     quit()
-                    
-            
-            
-        tela.fill(branco)
-        tela.blit(fundoStart, (0,0) )
+                clicando_start = False
+                clicando_quit = False
 
-        startButton = pygame.draw.rect(tela, branco, (10,10, larguraButtonStart, alturaButtonStart), border_radius=15)
-        startTexto = fonteMenu.render("Iniciar Game", True, preto)
-        tela.blit(startTexto, (25,20))
-        
-        quitButton = pygame.draw.rect(tela, branco, (10,60, larguraButtonQuit, alturaButtonQuit), border_radius=15)
-        quitTexto = fonteMenu.render("Sair do Game", True, preto)
-        tela.blit(quitTexto, (25,70))
-        
+        tela.fill(branco)
+        tela.blit(fundoStart, (0, 0))
+
+        if clicando_start:
+            botao_menor = pygame.transform.scale(botao, (int(largura * 0.95), int(altura * 0.95)))
+            tela.blit(botao_menor, (x_start + 2.5, y_start + 2.5))  
+        else:
+            tela.blit(botao, (x_start, y_start))
+
+        if clicando_quit:
+            botao_menor = pygame.transform.scale(botao, (int(largura * 0.95), int(altura * 0.95)))
+            tela.blit(botao_menor, (x_quit + 2.5, y_quit + 2.5))  
+        else:
+            tela.blit(botao, (x_quit, y_quit))
+
+        startTexto = fonteMenu.render("Iniciar", True, preto)
+        quitTexto = fonteMenu.render("Sair", True, preto)
+        tela.blit(startTexto, (x_start + 26, y_start + 17))
+        tela.blit(quitTexto, (x_quit + 32, y_quit + 17))
+
         pygame.display.update()
         relogio.tick(60)
 
