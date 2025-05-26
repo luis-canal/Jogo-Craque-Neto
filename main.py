@@ -311,15 +311,15 @@ def dead(nome, pontos):
         
         exibir_texto_centralizado(tela, f"Nome: {nome}", fonteMenu, branco, 1000, 380)
         exibir_texto_centralizado(tela, f"Pontos: {pontos}", fonteMenu, branco, 1000, 430)
-        exibir_texto_centralizado(tela, "Pressione ENTER para jogar novamente", fonteMenu , branco, 1000, 516)
+        exibir_texto_centralizado(tela, "Pressione ENTER para jogar novamente", fonteMenu , branco, 1000, 860)
         
         
         y_base = 480
-        tela.blit(fonte_pequena.render("Últimos 5 registros:", True, (255, 255, 0)), (50, y_base))
+        tela.blit(fonteMenu.render("Últimos 5 registros:", True, (255, 0, 0)), (50, y_base))
         for i, (nick, dados) in enumerate(ultimos_logs):
             pontos_registro, data_registro, hora_registro = dados
             texto_log = f"{nick} - {pontos_registro} pts em {data_registro} às {hora_registro}"
-            texto_render = fonte_media.render(texto_log, True, (255, 255, 255))
+            texto_render = fonteMenu.render(texto_log, True, (255, 255, 255))
             tela.blit(texto_render, (50, y_base + 30 + i * 30))
 
         pygame.display.update()
