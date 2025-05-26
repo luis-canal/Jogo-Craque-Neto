@@ -128,8 +128,8 @@ def jogar():
     pygame.mixer.music.play(-1)
     pontos = 0
     pausado = False
-    larguraPersona = 250
-    alturaPersona = 127
+    larguraPersona = 112
+    alturaPersona = 278
     larguaMissel  = 50
     alturaMissel  = 250
     dificuldade  = 30
@@ -168,15 +168,15 @@ def jogar():
         posicaoXPersona = posicaoXPersona + movimentoXPersona            
         posicaoYPersona = posicaoYPersona + movimentoYPersona            
         
-        if posicaoXPersona < 0 :
-            posicaoXPersona = 15
-        elif posicaoXPersona >750:
-            posicaoXPersona = 740
-            
-        if posicaoYPersona < 0 :
-            posicaoYPersona = 15
-        elif posicaoYPersona > 573:
-            posicaoYPersona = 563
+        if posicaoXPersona < 0:
+            posicaoXPersona = 0
+        elif posicaoXPersona > (1000 - larguraPersona):
+            posicaoXPersona = 1000 - larguraPersona
+
+        if posicaoYPersona < 0:
+            posicaoYPersona = 0
+        elif posicaoYPersona > (700 - alturaPersona):
+            posicaoYPersona = 700 - alturaPersona
         
             
         tela.fill(branco)
