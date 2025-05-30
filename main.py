@@ -7,6 +7,7 @@ from recursos.funcoes import inicializarBancoDeDados
 from recursos.funcoes import escreverDados
 from recursos.funcaoUtil import exibir_texto_centralizado
 import json
+import math
 
 pygame.init()
 inicializarBancoDeDados()
@@ -34,8 +35,24 @@ explosaoSound = pygame.mixer.Sound("recursos/assets/explosao.wav")
 fonteMenu = pygame.font.Font("recursos/assets/Pixellari.ttf",18)
 fonteMorte = pygame.font.Font("recursos/assets/Pixellari.ttf",120)
 pygame.mixer.music.load("recursos/assets/ironsound.mp3")
-botao = pygame.image.load("recursos/assets/botao.png").convert_alpha()
-botao = pygame.transform.scale(botao, (100,50))
+botaoIniciar = pygame.image.load("recursos/assets/botaoIniciar.png").convert_alpha()
+botaoIniciar = pygame.transform.scale(botaoIniciar, (100,68))
+botaoSair = pygame.image.load("recursos/assets/botaoSair.png").convert_alpha()
+botaoSair = pygame.transform.scale(botaoSair, (100,68))
+botaoStart = pygame.image.load("recursos/assets/botaoStart.png").convert_alpha()
+botaoStart = pygame.transform.scale(botaoStart, (100,68))
+objetos_queda_imgs = [
+    pygame.image.load("recursos/assets/cabeloDeBoneca.png").convert_alpha(),
+    pygame.image.load("recursos/assets/cassio.png").convert_alpha(),
+    pygame.image.load("recursos/assets/corinthians.png").convert_alpha(),
+    pygame.image.load("recursos/assets/estudo.png").convert_alpha(),
+    pygame.image.load("recursos/assets/palmeiras.png").convert_alpha(),
+    pygame.image.load("recursos/assets/pao.png").convert_alpha(),
+    pygame.image.load("recursos/assets/rato.png").convert_alpha(),
+    pygame.image.load("recursos/assets/souza.png").convert_alpha(),
+    pygame.image.load("recursos/assets/televisao.png").convert_alpha()
+]
+objetos_queda_imgs = [pygame.transform.scale(img, (80, 80)) for img in objetos_queda_imgs]
 
 #Função da tela de boas vindas
 def boas_vindas(nome):
@@ -43,7 +60,7 @@ def boas_vindas(nome):
     clicando = False
 
     x_botao, y_botao = 450, 400
-    largura, altura = 100, 50
+    largura, altura = 100, 68
     rect_botao = pygame.Rect(x_botao, y_botao, largura, altura)
 
     while mostrando:
@@ -70,31 +87,49 @@ def boas_vindas(nome):
         tela.blit(explicacao3, (100, 340))
 
         if clicando:
-            botao_menor = pygame.transform.scale(botao, (int(largura * 0.95), int(altura * 0.95)))
+            botao_menor = pygame.transform.scale(botaoStart, (int(largura * 0.95), int(altura * 0.95)))
             tela.blit(botao_menor, (x_botao + 2.5, y_botao + 2.5))
         else:
-            tela.blit(botao, (x_botao, y_botao))
-
-        exibir_texto_centralizado(tela, "Start", fonteMenu, preto, 1000, 850)
+            tela.blit(botaoStart, (x_botao, y_botao))
 
         pygame.display.update()
         relogio.tick(60)
 
+class ObjetoQueCai:
+    def __init__(self, velocidade=1):
+        self.imagem = random.choice(objetos_queda_imgs)
+        self.x = random.randint(0, 950)
+        self.y = -80
+        self.velocidade = velocidade  # Agora controlada externamente
+
+    def mover(self):
+        self.y += self.velocidade
+
+    def desenhar(self, tela):
+        tela.blit(self.imagem, (self.x, self.y))
+
+    def colidiu_com(self, px, py, largura, altura):
+        return (
+            self.x < px + largura and
+            self.x + 80 > px and
+            self.y < py + altura and
+            self.y + 80 > py
+        )
+
+
 def jogar():
     largura_janela = 300
-    altura_janela = 50
+    altura_janela = 80
+
     def obter_nome():
         global nome
-        nome = entry_nome.get()  # Obtém o texto digitado
-        if not nome:  # Se o campo estiver vazio
-            messagebox.showwarning("Aviso", "Por favor, digite seu nome!")  # Exibe uma mensagem de aviso
+        nome = entry_nome.get()
+        if not nome:
+            messagebox.showwarning("Aviso", "Por favor, digite seu nome!")
         else:
-            #print(f'Nome digitado: {nome}')  # Exibe o nome no console
-            root.destroy()  # Fecha a janela após a entrada válida
+            root.destroy()
 
-    # Criação da janela principal
     root = tk.Tk()
-    # Obter as dimensões da tela
     largura_tela = root.winfo_screenwidth()
     altura_tela = root.winfo_screenheight()
     pos_x = (largura_tela - largura_janela) // 2
@@ -103,45 +138,39 @@ def jogar():
     root.title("Informe seu nickname")
     root.protocol("WM_DELETE_WINDOW", obter_nome)
 
-    # Entry (campo de texto)
     entry_nome = tk.Entry(root)
     entry_nome.pack()
 
-    # Botão para pegar o nome
     botao = tk.Button(root, text="Enviar", command=obter_nome)
     botao.pack()
 
-    # Inicia o loop da interface gráfica
     root.mainloop()
 
     boas_vindas(nome)
-    
 
     posicaoXPersona = 400
     posicaoYPersona = 300
-    movimentoXPersona  = 0
-    movimentoYPersona  = 0
-    posicaoXMissel = 400
-    posicaoYMissel = -240
-    velocidadeMissel = 1
+    movimentoXPersona = 0
+    movimentoYPersona = 0
     pygame.mixer.Sound.play(missileSound)
     pygame.mixer.music.play(-1)
+
     pontos = 0
     pausado = False
     larguraPersona = 112
     alturaPersona = 278
-    larguaMissel  = 50
-    alturaMissel  = 250
-    dificuldade  = 30
+
+    # Cria o primeiro objeto com velocidade inicial
+    objeto = ObjetoQueCai(velocidade=1)
+
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
             elif evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_SPACE:
-                    pausado = not pausado  # Alterna entre pausado e não pausado
-
-                if not pausado:  # Só permite movimento se não estiver pausado
+                    pausado = not pausado
+                if not pausado:
                     if evento.key == pygame.K_RIGHT:
                         movimentoXPersona = 15
                     elif evento.key == pygame.K_LEFT:
@@ -150,12 +179,11 @@ def jogar():
                         movimentoYPersona = -15
                     elif evento.key == pygame.K_DOWN:
                         movimentoYPersona = 15
-
             elif evento.type == pygame.KEYUP:
-                if not pausado:  # Impede travamento de movimento durante o pause
-                    if evento.key == pygame.K_RIGHT or evento.key == pygame.K_LEFT:
+                if not pausado:
+                    if evento.key in [pygame.K_RIGHT, pygame.K_LEFT]:
                         movimentoXPersona = 0
-                    elif evento.key == pygame.K_UP or evento.key == pygame.K_DOWN:
+                    elif evento.key in [pygame.K_UP, pygame.K_DOWN]:
                         movimentoYPersona = 0
 
         if pausado:
@@ -164,10 +192,9 @@ def jogar():
             relogio.tick(60)
             continue
 
-                
-        posicaoXPersona = posicaoXPersona + movimentoXPersona            
-        posicaoYPersona = posicaoYPersona + movimentoYPersona            
-        
+        posicaoXPersona += movimentoXPersona
+        posicaoYPersona += movimentoYPersona
+
         if posicaoXPersona < 0:
             posicaoXPersona = 0
         elif posicaoXPersona > (1000 - larguraPersona):
@@ -177,50 +204,42 @@ def jogar():
             posicaoYPersona = 0
         elif posicaoYPersona > (700 - alturaPersona):
             posicaoYPersona = 700 - alturaPersona
-        
-            
+
         tela.fill(branco)
-        tela.blit(fundoJogo, (0,0) )
-        #pygame.draw.circle(tela, preto, (posicaoXPersona,posicaoYPersona), 40, 0 )
-        tela.blit( craqueNeto, (posicaoXPersona, posicaoYPersona) )
-        
-        posicaoYMissel = posicaoYMissel + velocidadeMissel
-        if posicaoYMissel > 600:
-            posicaoYMissel = -240
-            pontos = pontos + 1
-            velocidadeMissel = velocidadeMissel + 1
-            posicaoXMissel = random.randint(0,800)
+        tela.blit(fundoJogo, (0, 0))
+        tela.blit(craqueNeto, (posicaoXPersona, posicaoYPersona))
+
+        # Atualiza e desenha o objeto atual
+        objeto.mover()
+        objeto.desenhar(tela)
+
+        # Se o objeto saiu da tela
+        if objeto.y > 700:
+            pontos += 1
+            velocidade_nova = min(1 + int(math.sqrt(pontos)), 10)
+            objeto = ObjetoQueCai(velocidade=velocidade_nova)
             pygame.mixer.Sound.play(missileSound)
-            
-            
-        tela.blit( missel, (posicaoXMissel, posicaoYMissel) )
-        
+
+        # Verifica colisão
+        if objeto.colidiu_com(posicaoXPersona, posicaoYPersona, larguraPersona, alturaPersona):
+            escreverDados(nome, pontos)
+            dead(nome, pontos)
+            return
+
         textoPressPause = fonteMenu.render("Press 'Space' to pause the game", True, branco)
-        tela.blit(textoPressPause, (15,35))
-        texto = fonteMenu.render("Pontos: "+str(pontos), True, branco)
-        tela.blit(texto, (15,15))
-        
-        pixelsPersonaX = list(range(posicaoXPersona, posicaoXPersona+larguraPersona))
-        pixelsPersonaY = list(range(posicaoYPersona, posicaoYPersona+alturaPersona))
-        pixelsMisselX = list(range(posicaoXMissel, posicaoXMissel + larguaMissel))
-        pixelsMisselY = list(range(posicaoYMissel, posicaoYMissel + alturaMissel))
-        
-        os.system("cls")
-        # print( len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )   )
-        if  len( list( set(pixelsMisselY).intersection(set(pixelsPersonaY))) ) > dificuldade:
-            if len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )  > dificuldade:
-                escreverDados(nome, pontos)
-                dead(nome, pontos)
-                return
-            
-       
+        tela.blit(textoPressPause, (15, 35))
+        texto = fonteMenu.render("Pontos: " + str(pontos), True, branco)
+        tela.blit(texto, (15, 15))
+
         pygame.display.update()
         relogio.tick(60)
 
+
+
 def start():
     x_start, y_start = 450, 440
-    x_quit, y_quit = 450, 500
-    largura, altura = 100, 50
+    x_quit, y_quit = 450, 525
+    largura, altura = 100, 68
 
     rect_start = pygame.Rect(x_start, y_start, largura, altura)
     rect_quit = pygame.Rect(x_quit, y_quit, largura, altura)
@@ -251,21 +270,16 @@ def start():
         tela.blit(fundoStart, (0, 0))
 
         if clicando_start:
-            botao_menor = pygame.transform.scale(botao, (int(largura * 0.95), int(altura * 0.95)))
+            botao_menor = pygame.transform.scale(botaoStart, (int(largura * 0.95), int(altura * 0.95)))
             tela.blit(botao_menor, (x_start + 2.5, y_start + 2.5))  
         else:
-            tela.blit(botao, (x_start, y_start))
+            tela.blit(botaoStart, (x_start, y_start))
 
         if clicando_quit:
-            botao_menor = pygame.transform.scale(botao, (int(largura * 0.95), int(altura * 0.95)))
+            botao_menor = pygame.transform.scale(botaoSair, (int(largura * 0.95), int(altura * 0.95)))
             tela.blit(botao_menor, (x_quit + 2.5, y_quit + 2.5))  
         else:
-            tela.blit(botao, (x_quit, y_quit))
-
-        startTexto = fonteMenu.render("Iniciar", True, preto)
-        quitTexto = fonteMenu.render("Sair", True, preto)
-        tela.blit(startTexto, (x_start + 26, y_start + 17))
-        tela.blit(quitTexto, (x_quit + 32, y_quit + 17))
+            tela.blit(botaoSair, (x_quit, y_quit))
 
         pygame.display.update()
         relogio.tick(60)
