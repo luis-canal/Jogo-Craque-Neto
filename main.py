@@ -43,6 +43,8 @@ botaoStart = pygame.image.load("recursos/assets/botaoStart.png").convert_alpha()
 botaoStart = pygame.transform.scale(botaoStart, (100,68))
 microfone_img = pygame.image.load("recursos/assets/microfone.png").convert_alpha()
 microfone_img = pygame.transform.scale(microfone_img, (70, 70))
+camera = pygame.image.load("recursos/assets/camera.png").convert_alpha()
+camera = pygame.transform.scale(camera, (70, 70))
 objetos_queda_imgs = [
     pygame.image.load("recursos/assets/cabeloDeBoneca.png").convert_alpha(),
     pygame.image.load("recursos/assets/cassio.png").convert_alpha(),
@@ -150,6 +152,31 @@ class MicrofoneDecorativo:
     def desenhar(self, tela):
         tela.blit(self.imagem, self.pos)
 
+class CameraDecorativa:
+    def __init__(self):
+        self.imagem_original = camera  # imagem já carregada e escalada
+        self.posicao = (900, 20)  # canto superior esquerdo
+        self.escala = 1.0
+        self.direcao = 1  # 1 para aumentar, -1 para diminuir
+        self.velocidade_pulsacao = 0.001
+        self.escala_min = 0.9
+        self.escala_max = 1.1
+
+    def atualizar(self):
+        # Atualiza a escala
+        self.escala += self.direcao * self.velocidade_pulsacao
+        if self.escala >= self.escala_max:
+            self.escala = self.escala_max
+            self.direcao = -1
+        elif self.escala <= self.escala_min:
+            self.escala = self.escala_min
+            self.direcao = 1
+
+    def desenhar(self, tela):
+        largura = int(self.imagem_original.get_width() * self.escala)
+        altura = int(self.imagem_original.get_height() * self.escala)
+        imagem_escalada = pygame.transform.scale(self.imagem_original, (largura, altura))
+        tela.blit(imagem_escalada, self.posicao)
 
 def jogar():
     largura_janela = 300
@@ -196,6 +223,7 @@ def jogar():
 
     objeto = ObjetoQueCai(velocidade=1)
     microfone = MicrofoneDecorativo()
+    camera = CameraDecorativa()
 
 
     while True:
@@ -244,6 +272,8 @@ def jogar():
         tela.blit(fundoJogo, (0, 0))
         microfone.atualizar()
         microfone.desenhar(tela)
+        camera.atualizar()
+        camera.desenhar(tela)
         tela.blit(craqueNeto, (posicaoXPersona, posicaoYPersona))
 
         # Atualiza e desenha o objeto atual
