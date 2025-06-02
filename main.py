@@ -42,7 +42,7 @@ botaoSair = pygame.transform.scale(botaoSair, (100,68))
 botaoStart = pygame.image.load("recursos/assets/botaoStart.png").convert_alpha()
 botaoStart = pygame.transform.scale(botaoStart, (100,68))
 microfone_img = pygame.image.load("recursos/assets/microfone.png").convert_alpha()
-microfone_img = pygame.transform.scale(microfone_img, (50, 50))
+microfone_img = pygame.transform.scale(microfone_img, (70, 70))
 objetos_queda_imgs = [
     pygame.image.load("recursos/assets/cabeloDeBoneca.png").convert_alpha(),
     pygame.image.load("recursos/assets/cassio.png").convert_alpha(),
@@ -121,24 +121,34 @@ class ObjetoQueCai:
 class MicrofoneDecorativo:
     def __init__(self):
         self.imagem = microfone_img
-        self.x = random.randint(0, 950)
-        self.y = random.randint(0, 650)
-        self.direcao_x = random.choice([-1, 1])
-        self.direcao_y = random.choice([-1, 1])
-        self.velocidade = random.uniform(1, 3)
+        self.pos = pygame.Vector2(random.randint(100, 800), random.randint(100, 500))
+        self.velocidade = pygame.Vector2(0, 0)
+        self.direcao = pygame.Vector2(0, 0)
+        self.tempo_ate_mudar = random.randint(60, 180)
+        self.contador = 0
 
-    def mover(self):
-        self.x += self.direcao_x * self.velocidade
-        self.y += self.direcao_y * self.velocidade
+    def atualizar(self):
+        self.contador += 1
 
-        # Rebater nas bordas da tela
-        if self.x < 0 or self.x > 950:
-            self.direcao_x *= -1
-        if self.y < 0 or self.y > 650:
-            self.direcao_y *= -1
+        # Muda de direção e velocidade de tempos em tempos
+        if self.contador >= self.tempo_ate_mudar:
+            self.direcao = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1))
+            self.direcao.normalize_ip()
+            self.velocidade = self.direcao * random.uniform(0.2, 1.5)
+            self.tempo_ate_mudar = random.randint(60, 180)
+            self.contador = 0
+
+        # Movimento suave com leve inércia
+        self.pos += self.velocidade
+
+        # Limites da tela com "rebote" natural
+        if self.pos.x < 50 or self.pos.x > 850:
+            self.velocidade.x *= -1
+        if self.pos.y < 50 or self.pos.y > 550:
+            self.velocidade.y *= -1
 
     def desenhar(self, tela):
-        tela.blit(self.imagem, (self.x, self.y))
+        tela.blit(self.imagem, self.pos)
 
 
 def jogar():
@@ -232,6 +242,8 @@ def jogar():
 
         tela.fill(branco)
         tela.blit(fundoJogo, (0, 0))
+        microfone.atualizar()
+        microfone.desenhar(tela)
         tela.blit(craqueNeto, (posicaoXPersona, posicaoYPersona))
 
         # Atualiza e desenha o objeto atual
@@ -255,9 +267,6 @@ def jogar():
         tela.blit(textoPressPause, (15, 35))
         texto = fonteMenu.render("Pontos: " + str(pontos), True, branco)
         tela.blit(texto, (15, 15))
-
-        microfone.mover()
-        microfone.desenhar(tela)
 
 
         pygame.display.update()
