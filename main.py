@@ -158,7 +158,7 @@ class CameraDecorativa:
         self.posicao = (900, 20)  # canto superior esquerdo
         self.escala = 1.0
         self.direcao = 1  # 1 para aumentar, -1 para diminuir
-        self.velocidade_pulsacao = 0.001
+        self.velocidade_pulsacao = 0.002
         self.escala_min = 0.9
         self.escala_max = 1.1
 
@@ -221,7 +221,7 @@ def jogar():
     larguraPersona = 112
     alturaPersona = 278
 
-    objeto = ObjetoQueCai(velocidade=1)
+    objeto = ObjetoQueCai(velocidade=3)
     microfone = MicrofoneDecorativo()
     camera = CameraDecorativa()
 
@@ -283,7 +283,7 @@ def jogar():
         # Se o objeto saiu da tela
         if objeto.y > 700:
             pontos += 1
-            velocidade_nova = min(1 + int(math.sqrt(pontos)), 10)
+            velocidade_nova = min(3 + int(pontos * 0.7), 15)
             objeto = ObjetoQueCai(velocidade=velocidade_nova)
             pygame.mixer.Sound.play(missileSound)
 
