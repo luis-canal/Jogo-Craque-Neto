@@ -1,7 +1,7 @@
 # pip install cx_freeze
 import cx_Freeze
 executaveis = [ 
-               cx_Freeze.Executable(script="feito.py", icon="recursos/assets/icone.ico") ]
+               cx_Freeze.Executable(script="main.py", icon="recursos/assets/icone.ico") ]
 cx_Freeze.setup(
     name = "Craque Neto",
     options={
