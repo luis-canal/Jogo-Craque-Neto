@@ -259,9 +259,9 @@ def jogar():
     boas_vindas(nome)
 
     posicaoXPersona = 400
-    posicaoYPersona = 300
+    posicaoYPersona = 320
     movimentoXPersona = 0
-    movimentoYPersona = 0
+    #movimentoYPersona = 0
     pygame.mixer.Sound.play(launchSound)
     pygame.mixer.music.play(-1)
 
@@ -287,16 +287,16 @@ def jogar():
                         movimentoXPersona = 15
                     elif evento.key == pygame.K_LEFT:
                         movimentoXPersona = -15
-                    elif evento.key == pygame.K_UP:
-                        movimentoYPersona = -15
-                    elif evento.key == pygame.K_DOWN:
-                        movimentoYPersona = 15
+                    #elif evento.key == pygame.K_UP:
+                        #movimentoYPersona = -15
+                    #elif evento.key == pygame.K_DOWN:
+                        #movimentoYPersona = 15
             elif evento.type == pygame.KEYUP:
                 if not pausado:
                     if evento.key in [pygame.K_RIGHT, pygame.K_LEFT]:
                         movimentoXPersona = 0
-                    elif evento.key in [pygame.K_UP, pygame.K_DOWN]:
-                        movimentoYPersona = 0
+                    #elif evento.key in [pygame.K_UP, pygame.K_DOWN]:
+                        #movimentoYPersona = 0
 
         if pausado:
             exibir_texto_centralizado(tela, "PAUSE", fonteMorte, branco, 1000, 700)
@@ -305,17 +305,17 @@ def jogar():
             continue
 
         posicaoXPersona += movimentoXPersona
-        posicaoYPersona += movimentoYPersona
+        #posicaoYPersona += movimentoYPersona
 
         if posicaoXPersona < 0:
             posicaoXPersona = 0
         elif posicaoXPersona > (1000 - larguraPersona):
             posicaoXPersona = 1000 - larguraPersona
 
-        if posicaoYPersona < 0:
-            posicaoYPersona = 0
-        elif posicaoYPersona > (700 - alturaPersona):
-            posicaoYPersona = 700 - alturaPersona
+        #if posicaoYPersona < 0:
+            #posicaoYPersona = 0
+        #elif posicaoYPersona > (700 - alturaPersona):
+            #posicaoYPersona = 700 - alturaPersona
 
         tela.fill(branco)
         tela.blit(fundoJogo, (0, 0))
