@@ -8,6 +8,10 @@ from recursos.funcoes import escreverDados
 from recursos.funcaoUtil import exibir_texto_centralizado
 import json
 import math
+import pyttsx3
+import speech_recognition as sr
+import threading
+import time
 
 pygame.init()
 inicializarBancoDeDados()
@@ -19,6 +23,7 @@ icone  = pygame.image.load("recursos/assets/icone.png")
 pygame.display.set_icon(icone)
 branco = (255,255,255)
 preto = (0, 0 ,0 )
+vermelho = (255, 0, 0)
 craqueNeto = pygame.image.load("recursos/assets/craqueNeto.png").convert_alpha()
 craqueNeto = pygame.transform.scale(craqueNeto, (112, 278))
 fundoStart = pygame.image.load("recursos/assets/fundoStart.jpg")
@@ -29,18 +34,21 @@ fundoDead = pygame.image.load("recursos/assets/fundoDead.jpg")
 fundoDead = pygame.transform.scale(fundoDead, (1000, 700))
 fundoBoasVindas = pygame.image.load("recursos/assets/fundoBoasVindas.jpg")
 fundoBoasVindas = pygame.transform.scale(fundoBoasVindas, (1000, 700))
-missel = pygame.image.load("recursos/assets/missile.png").convert_alpha()
-missileSound = pygame.mixer.Sound("recursos/assets/missile.wav")
-explosaoSound = pygame.mixer.Sound("recursos/assets/explosao.wav")
+launchSound = pygame.mixer.Sound("recursos/assets/launchSound.mp3")
+deathSound = pygame.mixer.Sound("recursos/assets/deathSound.mp3")
 fonteMenu = pygame.font.Font("recursos/assets/Pixellari.ttf",18)
 fonteMorte = pygame.font.Font("recursos/assets/Pixellari.ttf",120)
-pygame.mixer.music.load("recursos/assets/ironsound.mp3")
+pygame.mixer.music.load("recursos/assets/craqueSoundTrack.mp3")
 botaoIniciar = pygame.image.load("recursos/assets/botaoIniciar.png").convert_alpha()
 botaoIniciar = pygame.transform.scale(botaoIniciar, (100,68))
 botaoSair = pygame.image.load("recursos/assets/botaoSair.png").convert_alpha()
 botaoSair = pygame.transform.scale(botaoSair, (100,68))
 botaoStart = pygame.image.load("recursos/assets/botaoStart.png").convert_alpha()
 botaoStart = pygame.transform.scale(botaoStart, (100,68))
+microfone_img = pygame.image.load("recursos/assets/microfone.png").convert_alpha()
+microfone_img = pygame.transform.scale(microfone_img, (70, 70))
+camera = pygame.image.load("recursos/assets/camera.png").convert_alpha()
+camera = pygame.transform.scale(camera, (70, 70))
 objetos_queda_imgs = [
     pygame.image.load("recursos/assets/cabeloDeBoneca.png").convert_alpha(),
     pygame.image.load("recursos/assets/cassio.png").convert_alpha(),
@@ -53,15 +61,52 @@ objetos_queda_imgs = [
     pygame.image.load("recursos/assets/televisao.png").convert_alpha()
 ]
 objetos_queda_imgs = [pygame.transform.scale(img, (80, 80)) for img in objetos_queda_imgs]
+comando_reconhecido = None
 
-#Função da tela de boas vindas
+def falar(texto):
+    engine = pyttsx3.init()
+    engine.setProperty('rate', 150)  
+    engine.setProperty('volume', 1.0)  
+    engine.say(texto)
+    engine.runAndWait()
+
+def ouvir_comando_background():
+    time.sleep(3)
+    global comando_reconhecido
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Aguardando comando de voz ('iniciar' ou 'sair')...")
+        try:
+            audio = r.listen(source, timeout=30, phrase_time_limit=9)
+            comando = r.recognize_google(audio, language='pt-BR').lower()
+            print("Comando reconhecido:", comando)
+            comando_reconhecido = comando
+        except sr.WaitTimeoutError:
+            print("Nenhuma fala detectada.")
+        except sr.UnknownValueError:
+            print("Não entendi o que foi dito.")
+        except sr.RequestError:
+            print("Erro ao acessar o serviço de reconhecimento.")
+
 def boas_vindas(nome):
     mostrando = True
     clicando = False
+    falando = True
+    global comando_reconhecido
+    comando_reconhecido = None
+
+    tempo_inicial = pygame.time.get_ticks()
+    delay_fala = 1000
+    delay_escuta = 3000
+
+    
+    thread_voz = threading.Thread(target=ouvir_comando_background)
+    thread_voz.start()
 
     x_botao, y_botao = 450, 400
     largura, altura = 100, 68
     rect_botao = pygame.Rect(x_botao, y_botao, largura, altura)
+
 
     while mostrando:
         for evento in pygame.event.get():
@@ -75,16 +120,24 @@ def boas_vindas(nome):
                     mostrando = False
                 clicando = False
 
+        if comando_reconhecido and pygame.time.get_ticks() - tempo_inicial > delay_escuta:
+            if "iniciar" in comando_reconhecido:
+                mostrando = False
+            elif "sair" in comando_reconhecido:
+                quit()
+
         tela.fill(preto)
         tela.blit(fundoBoasVindas, (0, 0))
 
-        explicacao1 = fonteMenu.render("Você deve desviar dos mísseis que caem do céu.", True, branco)
-        explicacao2 = fonteMenu.render("Use as setas do teclado para se mover.", True, branco)
-        explicacao3 = fonteMenu.render("Tente alcançar a maior pontuação possível!", True, branco)
+        if falando and pygame.time.get_ticks() - tempo_inicial > delay_fala:
+            falar(f"Bem vindo, {nome}! Prepare-se para começar")
+            falando = False
 
-        tela.blit(explicacao1, (100, 280))
-        tela.blit(explicacao2, (100, 310))
-        tela.blit(explicacao3, (100, 340))
+        exibir_texto_centralizado(tela, "Fale: 'iniciar' para começar o jogo", fonteMenu, vermelho, 1000, 630)
+        exibir_texto_centralizado(tela, "Fale: 'sair' para sair do jogo", fonteMenu, vermelho, 1000, 690)
+        exibir_texto_centralizado(tela, "Você deve desviar das 'pérolas' que caem do céu", fonteMenu, branco, 1000, 1000)
+        exibir_texto_centralizado(tela, "Use as setas do teclado para se mover", fonteMenu, branco, 1000, 1060)
+        exibir_texto_centralizado(tela, "Tente alcançar a maior pontuação possível!", fonteMenu, branco, 1000, 1120)
 
         if clicando:
             botao_menor = pygame.transform.scale(botaoStart, (int(largura * 0.95), int(altura * 0.95)))
@@ -115,6 +168,64 @@ class ObjetoQueCai:
             self.y < py + altura and
             self.y + 80 > py
         )
+
+class MicrofoneDecorativo:
+    def __init__(self):
+        self.imagem = microfone_img
+        self.pos = pygame.Vector2(random.randint(100, 800), random.randint(100, 500))
+        self.velocidade = pygame.Vector2(0, 0)
+        self.direcao = pygame.Vector2(0, 0)
+        self.tempo_ate_mudar = random.randint(60, 180)
+        self.contador = 0
+
+    def atualizar(self):
+        self.contador += 1
+
+        # Muda de direção e velocidade de tempos em tempos
+        if self.contador >= self.tempo_ate_mudar:
+            self.direcao = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1))
+            self.direcao.normalize_ip()
+            self.velocidade = self.direcao * random.uniform(0.2, 1.5)
+            self.tempo_ate_mudar = random.randint(60, 180)
+            self.contador = 0
+
+        # Movimento suave com leve inércia
+        self.pos += self.velocidade
+
+        # Limites da tela com "rebote" natural
+        if self.pos.x < 50 or self.pos.x > 850:
+            self.velocidade.x *= -1
+        if self.pos.y < 50 or self.pos.y > 550:
+            self.velocidade.y *= -1
+
+    def desenhar(self, tela):
+        tela.blit(self.imagem, self.pos)
+
+class CameraDecorativa:
+    def __init__(self):
+        self.imagem_original = camera  # imagem já carregada e escalada
+        self.posicao = (900, 20)  # canto superior esquerdo
+        self.escala = 1.0
+        self.direcao = 1  # 1 para aumentar, -1 para diminuir
+        self.velocidade_pulsacao = 0.002
+        self.escala_min = 0.9
+        self.escala_max = 1.1
+
+    def atualizar(self):
+        # Atualiza a escala
+        self.escala += self.direcao * self.velocidade_pulsacao
+        if self.escala >= self.escala_max:
+            self.escala = self.escala_max
+            self.direcao = -1
+        elif self.escala <= self.escala_min:
+            self.escala = self.escala_min
+            self.direcao = 1
+
+    def desenhar(self, tela):
+        largura = int(self.imagem_original.get_width() * self.escala)
+        altura = int(self.imagem_original.get_height() * self.escala)
+        imagem_escalada = pygame.transform.scale(self.imagem_original, (largura, altura))
+        tela.blit(imagem_escalada, self.posicao)
 
 
 def jogar():
@@ -152,7 +263,7 @@ def jogar():
     posicaoYPersona = 300
     movimentoXPersona = 0
     movimentoYPersona = 0
-    pygame.mixer.Sound.play(missileSound)
+    pygame.mixer.Sound.play(launchSound)
     pygame.mixer.music.play(-1)
 
     pontos = 0
@@ -160,8 +271,10 @@ def jogar():
     larguraPersona = 112
     alturaPersona = 278
 
-    # Cria o primeiro objeto com velocidade inicial
-    objeto = ObjetoQueCai(velocidade=1)
+    objeto = ObjetoQueCai(velocidade=3)
+    microfone = MicrofoneDecorativo()
+    camera = CameraDecorativa()
+
 
     while True:
         for evento in pygame.event.get():
@@ -207,6 +320,10 @@ def jogar():
 
         tela.fill(branco)
         tela.blit(fundoJogo, (0, 0))
+        microfone.atualizar()
+        microfone.desenhar(tela)
+        camera.atualizar()
+        camera.desenhar(tela)
         tela.blit(craqueNeto, (posicaoXPersona, posicaoYPersona))
 
         # Atualiza e desenha o objeto atual
@@ -216,9 +333,9 @@ def jogar():
         # Se o objeto saiu da tela
         if objeto.y > 700:
             pontos += 1
-            velocidade_nova = min(1 + int(math.sqrt(pontos)), 10)
+            velocidade_nova = min(3 + int(pontos * 0.7), 15)
             objeto = ObjetoQueCai(velocidade=velocidade_nova)
-            pygame.mixer.Sound.play(missileSound)
+            pygame.mixer.Sound.play(launchSound)
 
         # Verifica colisão
         if objeto.colidiu_com(posicaoXPersona, posicaoYPersona, larguraPersona, alturaPersona):
@@ -230,6 +347,7 @@ def jogar():
         tela.blit(textoPressPause, (15, 35))
         texto = fonteMenu.render("Pontos: " + str(pontos), True, branco)
         tela.blit(texto, (15, 15))
+
 
         pygame.display.update()
         relogio.tick(60)
@@ -297,7 +415,10 @@ def ler_ultimos_registros(caminho_arquivo="dados.json", quantidade=5):
 
 def dead(nome, pontos):
     pygame.mixer.music.stop()
-    pygame.mixer.Sound.play(explosaoSound)
+    pygame.mixer.Sound.play(deathSound)
+    falando = True
+    tempo_inicial = pygame.time.get_ticks()
+    delay_fala = 5000
 
     with open("log.dat", "r") as arquivo:
         log_partidas = json.load(arquivo)
@@ -335,6 +456,10 @@ def dead(nome, pontos):
             texto_log = f"{nick} - {pontos_registro} pts em {data_registro} às {hora_registro}"
             texto_render = fonteMenu.render(texto_log, True, (255, 255, 255))
             tela.blit(texto_render, (50, y_base + 30 + i * 30))
+
+        if falando and pygame.time.get_ticks() - tempo_inicial > delay_fala:
+            falar(f"Morreu! Você atingiu {pontos} pontos.")
+            falando = False
 
         pygame.display.update()
         relogio.tick(60)
