@@ -227,7 +227,6 @@ class CameraDecorativa:
         imagem_escalada = pygame.transform.scale(self.imagem_original, (largura, altura))
         tela.blit(imagem_escalada, self.posicao)
 
-
 def jogar():
     largura_janela = 300
     altura_janela = 80
