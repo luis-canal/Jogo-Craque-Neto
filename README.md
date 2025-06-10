@@ -24,3 +24,8 @@ O jogo traz um clima descontraído e satírico, homenageando o estilo irreverent
 - **Time** – Usado para controlar intervalos de tempo e delays.
 - **Pyttsx3** – Síntese de voz offline; usado para fazer o jogo "falar".
 - **SpeechRecognition** – Reconhecimento de comandos por voz, permitindo interatividade extra.
+
+
+Testador do jogo:
+Nome: Kaiki André Pauletto
+RA: 1138218
