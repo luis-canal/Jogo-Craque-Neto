@@ -63,6 +63,24 @@ objetos_queda_imgs = [
 objetos_queda_imgs = [pygame.transform.scale(img, (80, 80)) for img in objetos_queda_imgs]
 comando_reconhecido = None
 
+def fade(tela, cor=(0, 0, 0), tempo=500, modo='in'):
+    fade_surface = pygame.Surface(tela.get_size())
+    fade_surface.fill(cor)
+    clock = pygame.time.Clock()
+
+    if modo == 'in':
+        for alpha in range(255, -1, -10):  # De preto para a tela
+            fade_surface.set_alpha(alpha)
+            tela.blit(fade_surface, (0, 0))
+            pygame.display.update()
+            clock.tick(60)
+    elif modo == 'out':
+        for alpha in range(0, 256, 10):  # De tela para preto
+            fade_surface.set_alpha(alpha)
+            tela.blit(fade_surface, (0, 0))
+            pygame.display.update()
+            clock.tick(60)
+
 def falar(texto):
     engine = pyttsx3.init()
     engine.setProperty('rate', 150)  
@@ -89,6 +107,7 @@ def ouvir_comando_background():
             print("Erro ao acessar o serviço de reconhecimento.")
 
 def boas_vindas(nome):
+    fade(tela, modo='in')
     mostrando = True
     clicando = False
     falando = True
@@ -122,8 +141,10 @@ def boas_vindas(nome):
 
         if comando_reconhecido and pygame.time.get_ticks() - tempo_inicial > delay_escuta:
             if "iniciar" in comando_reconhecido:
+                fade(tela, modo='out')
                 mostrando = False
             elif "sair" in comando_reconhecido:
+                fade(tela, modo='out')
                 quit()
 
         tela.fill(preto)
@@ -153,7 +174,7 @@ class ObjetoQueCai:
         self.imagem = random.choice(objetos_queda_imgs)
         self.x = random.randint(0, 950)
         self.y = -80
-        self.velocidade = velocidade  # Agora controlada externamente
+        self.velocidade = velocidade   
 
     def mover(self):
         self.y += self.velocidade
@@ -181,7 +202,6 @@ class MicrofoneDecorativo:
     def atualizar(self):
         self.contador += 1
 
-        # Muda de direção e velocidade de tempos em tempos
         if self.contador >= self.tempo_ate_mudar:
             self.direcao = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1))
             self.direcao.normalize_ip()
@@ -189,10 +209,8 @@ class MicrofoneDecorativo:
             self.tempo_ate_mudar = random.randint(60, 180)
             self.contador = 0
 
-        # Movimento suave com leve inércia
         self.pos += self.velocidade
 
-        # Limites da tela com "rebote" natural
         if self.pos.x < 50 or self.pos.x > 850:
             self.velocidade.x *= -1
         if self.pos.y < 50 or self.pos.y > 550:
@@ -203,16 +221,15 @@ class MicrofoneDecorativo:
 
 class CameraDecorativa:
     def __init__(self):
-        self.imagem_original = camera  # imagem já carregada e escalada
-        self.posicao = (900, 20)  # canto superior esquerdo
+        self.imagem_original = camera  
+        self.posicao = (900, 20)  
         self.escala = 1.0
-        self.direcao = 1  # 1 para aumentar, -1 para diminuir
+        self.direcao = 1  
         self.velocidade_pulsacao = 0.002
         self.escala_min = 0.9
         self.escala_max = 1.1
 
     def atualizar(self):
-        # Atualiza a escala
         self.escala += self.direcao * self.velocidade_pulsacao
         if self.escala >= self.escala_max:
             self.escala = self.escala_max
@@ -228,6 +245,7 @@ class CameraDecorativa:
         tela.blit(imagem_escalada, self.posicao)
 
 def jogar():
+    fade(tela, modo='in')
     largura_janela = 300
     altura_janela = 80
 
@@ -261,7 +279,6 @@ def jogar():
     posicaoXPersona = 400
     posicaoYPersona = 320
     movimentoXPersona = 0
-    #movimentoYPersona = 0
     pygame.mixer.Sound.play(launchSound)
     pygame.mixer.music.play(-1)
 
@@ -287,16 +304,11 @@ def jogar():
                         movimentoXPersona = 15
                     elif evento.key == pygame.K_LEFT:
                         movimentoXPersona = -15
-                    #elif evento.key == pygame.K_UP:
-                        #movimentoYPersona = -15
-                    #elif evento.key == pygame.K_DOWN:
-                        #movimentoYPersona = 15
+                    
             elif evento.type == pygame.KEYUP:
                 if not pausado:
                     if evento.key in [pygame.K_RIGHT, pygame.K_LEFT]:
                         movimentoXPersona = 0
-                    #elif evento.key in [pygame.K_UP, pygame.K_DOWN]:
-                        #movimentoYPersona = 0
 
         if pausado:
             exibir_texto_centralizado(tela, "PAUSE", fonteMorte, branco, 1000, 700)
@@ -305,17 +317,11 @@ def jogar():
             continue
 
         posicaoXPersona += movimentoXPersona
-        #posicaoYPersona += movimentoYPersona
 
         if posicaoXPersona < 0:
             posicaoXPersona = 0
         elif posicaoXPersona > (1000 - larguraPersona):
             posicaoXPersona = 1000 - larguraPersona
-
-        #if posicaoYPersona < 0:
-            #posicaoYPersona = 0
-        #elif posicaoYPersona > (700 - alturaPersona):
-            #posicaoYPersona = 700 - alturaPersona
 
         tela.fill(branco)
         tela.blit(fundoJogo, (0, 0))
@@ -325,20 +331,18 @@ def jogar():
         camera.desenhar(tela)
         tela.blit(craqueNeto, (posicaoXPersona, posicaoYPersona))
 
-        # Atualiza e desenha o objeto atual
         objeto.mover()
         objeto.desenhar(tela)
 
-        # Se o objeto saiu da tela
         if objeto.y > 700:
             pontos += 1
             velocidade_nova = min(3 + int(pontos * 0.7), 15)
             objeto = ObjetoQueCai(velocidade=velocidade_nova)
             pygame.mixer.Sound.play(launchSound)
 
-        # Verifica colisão
         if objeto.colidiu_com(posicaoXPersona, posicaoYPersona, larguraPersona, alturaPersona):
             escreverDados(nome, pontos)
+            fade(tela, modo='out')
             dead(nome, pontos)
             return
 
@@ -354,6 +358,7 @@ def jogar():
 
 
 def start():
+    fade(tela, modo='in')
     x_start, y_start = 450, 440
     x_quit, y_quit = 450, 525
     largura, altura = 100, 68
@@ -377,8 +382,10 @@ def start():
 
             elif evento.type == pygame.MOUSEBUTTONUP:
                 if clicando_start and rect_start.collidepoint(evento.pos):
+                    fade(tela, modo='out')
                     jogar()
                 elif clicando_quit and rect_quit.collidepoint(evento.pos):
+                    fade(tela, modo='out')
                     quit()
                 clicando_start = False
                 clicando_quit = False
@@ -406,13 +413,12 @@ def ler_ultimos_registros(caminho_arquivo="dados.json", quantidade=5):
     try:
         with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
             dados = json.load(arquivo)
-            # Pega os últimos 'quantidade' registros
             return dados[-quantidade:]
     except (FileNotFoundError, json.JSONDecodeError):
-        # Caso o arquivo não exista ou esteja vazio/corrompido
         return []
 
 def dead(nome, pontos):
+    fade(tela, modo='in')
     pygame.mixer.music.stop()
     pygame.mixer.Sound.play(deathSound)
     falando = True
@@ -435,10 +441,12 @@ def dead(nome, pontos):
     while dead_screen:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
+                fade(tela, modo='out')
                 quit()
             elif evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_RETURN:
-                    dead_screen = False  # Sai da tela de morte e volta para start() / jogar()
+                    fade(tela, modo='out')
+                    dead_screen = False  
 
         tela.fill(preto)
         tela.blit(fundoDead, (0,0))
