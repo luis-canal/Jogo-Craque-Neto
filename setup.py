@@ -1,26 +1,39 @@
-import cx_Freeze
-import sys
+import PyInstaller.__main__
 import os
+import shutil
+import platform
 
-base = None
-if sys.platform == 'win32':
-    base = 'Win32GUI'
+nome_executavel = 'JogoDoCraqueNeto'
+icone_caminho = 'recursos/assets/icone.ico'
 
-executaveis = [cx_Freeze.Executable(script="main.py", base=base, icon="recursos/assets/icone.ico")]
+# Limpa builds anteriores
+for pasta in ['build', 'dist', '__pycache__']:
+    if os.path.exists(pasta):
+        shutil.rmtree(pasta)
 
-cx_Freeze.setup(
-    name="Craque Neto",
-    version="1.0",
-    description="Jogo do Craque Neto",
-    options={
-        "build_exe": {
-            "packages": ["pygame", "tkinter", "pyttsx3", "speech_recognition", "threading", "time", "random", "json", "os", "math"],
-            "include_files": [
-                "recursos/",
-                "dados.json",  # se o jogo já usa um arquivo de dados
-                "log.dat"      # se já existe o arquivo log
-            ]
-        }
-    },
-    executables=executaveis
-)
+# Verifica arquivos essenciais
+if not os.path.exists('main.py'):
+    raise FileNotFoundError("Arquivo 'main.py' não encontrado.")
+
+if not os.path.exists(icone_caminho):
+    raise FileNotFoundError(f"Ícone não encontrado em '{icone_caminho}'")
+
+# Define separador de caminhos
+separador = ';' if platform.system() == 'Windows' else ':'
+
+# Executa o PyInstaller
+PyInstaller.__main__.run([
+    'main.py',
+    f'--name={nome_executavel}',
+    '--onefile',
+    '--noconsole',
+    f'--icon={icone_caminho}',
+    f'--add-data=recursos/assets{separador}recursos/assets',
+    f'--add-data=log.dat{separador}.',
+    f'--add-data=README.md{separador}.',
+    f'--add-data=recursos/funcoes.py{separador}recursos',
+    f'--add-data=recursos/funcaoUtil.py{separador}recursos',
+])
+
+extensao = '.exe' if platform.system() == 'Windows' else ''
+print(f"\n✅ Executável gerado com sucesso em: dist/{nome_executavel}{extensao}\n")

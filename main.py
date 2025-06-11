@@ -1,6 +1,7 @@
 import pygame
 import random
 import os
+import sys
 import tkinter as tk
 from tkinter import messagebox
 from recursos.funcoes import inicializarBancoDeDados
@@ -13,52 +14,58 @@ import speech_recognition as sr
 import threading
 import time
 
+def caminho_recurso(*caminhos):
+    """Retorna o caminho absoluto para um recurso, compatível com PyInstaller."""
+    base = getattr(sys, '_MEIPASS', os.path.abspath("."))
+    return os.path.join(base, *caminhos)
+
+
 pygame.init()
 inicializarBancoDeDados()
 tamanho = (1000,700)
 relogio = pygame.time.Clock()
 tela = pygame.display.set_mode( tamanho ) 
 pygame.display.set_caption("Jogo do Craque Neto")
-icone  = pygame.image.load("recursos/assets/icone.png")
+icone  = pygame.image.load(caminho_recurso("recursos/assets/icone.png"))
 pygame.display.set_icon(icone)
 branco = (255,255,255)
 preto = (0, 0 ,0 )
 vermelho = (255, 0, 0)
-craqueNeto = pygame.image.load("recursos/assets/craqueNeto.png").convert_alpha()
+craqueNeto = pygame.image.load(caminho_recurso("recursos/assets/craqueNeto.png")).convert_alpha()
 craqueNeto = pygame.transform.scale(craqueNeto, (112, 278))
-fundoStart = pygame.image.load("recursos/assets/fundoStart.jpg")
+fundoStart = pygame.image.load(caminho_recurso("recursos/assets/fundoStart.jpg"))
 fundoStart = pygame.transform.scale(fundoStart, (1000, 700))
-fundoJogo = pygame.image.load("recursos/assets/fundoJogo.jpg")
+fundoJogo = pygame.image.load(caminho_recurso("recursos/assets/fundoJogo.jpg"))
 fundoJogo = pygame.transform.scale(fundoJogo, (1000, 700))
-fundoDead = pygame.image.load("recursos/assets/fundoDead.jpg")
+fundoDead = pygame.image.load(caminho_recurso("recursos/assets/fundoDead.jpg"))
 fundoDead = pygame.transform.scale(fundoDead, (1000, 700))
-fundoBoasVindas = pygame.image.load("recursos/assets/fundoBoasVindas.jpg")
+fundoBoasVindas = pygame.image.load(caminho_recurso("recursos/assets/fundoBoasVindas.jpg"))
 fundoBoasVindas = pygame.transform.scale(fundoBoasVindas, (1000, 700))
-launchSound = pygame.mixer.Sound("recursos/assets/launchSound.mp3")
-deathSound = pygame.mixer.Sound("recursos/assets/deathSound.mp3")
-fonteMenu = pygame.font.Font("recursos/assets/Pixellari.ttf",18)
-fonteMorte = pygame.font.Font("recursos/assets/Pixellari.ttf",120)
-pygame.mixer.music.load("recursos/assets/craqueSoundTrack.mp3")
-botaoIniciar = pygame.image.load("recursos/assets/botaoIniciar.png").convert_alpha()
+launchSound = pygame.mixer.Sound(caminho_recurso("recursos/assets/launchSound.mp3"))
+deathSound = pygame.mixer.Sound(caminho_recurso("recursos/assets/deathSound.mp3"))
+fonteMenu = pygame.font.Font(caminho_recurso("recursos/assets/Pixellari.ttf"), 18)
+fonteMorte = pygame.font.Font(caminho_recurso("recursos/assets/Pixellari.ttf"), 120)
+pygame.mixer.music.load(caminho_recurso("recursos/assets/craqueSoundTrack.mp3"))
+botaoIniciar = pygame.image.load(caminho_recurso("recursos/assets/botaoIniciar.png")).convert_alpha()
 botaoIniciar = pygame.transform.scale(botaoIniciar, (100,68))
-botaoSair = pygame.image.load("recursos/assets/botaoSair.png").convert_alpha()
+botaoSair = pygame.image.load(caminho_recurso("recursos/assets/botaoSair.png")).convert_alpha()
 botaoSair = pygame.transform.scale(botaoSair, (100,68))
-botaoStart = pygame.image.load("recursos/assets/botaoStart.png").convert_alpha()
+botaoStart = pygame.image.load(caminho_recurso("recursos/assets/botaoStart.png")).convert_alpha()
 botaoStart = pygame.transform.scale(botaoStart, (100,68))
-microfone_img = pygame.image.load("recursos/assets/microfone.png").convert_alpha()
+microfone_img = pygame.image.load(caminho_recurso("recursos/assets/microfone.png")).convert_alpha()
 microfone_img = pygame.transform.scale(microfone_img, (70, 70))
-camera = pygame.image.load("recursos/assets/camera.png").convert_alpha()
+camera = pygame.image.load(caminho_recurso("recursos/assets/camera.png")).convert_alpha()
 camera = pygame.transform.scale(camera, (70, 70))
 objetos_queda_imgs = [
-    pygame.image.load("recursos/assets/cabeloDeBoneca.png").convert_alpha(),
-    pygame.image.load("recursos/assets/cassio.png").convert_alpha(),
-    pygame.image.load("recursos/assets/corinthians.png").convert_alpha(),
-    pygame.image.load("recursos/assets/estudo.png").convert_alpha(),
-    pygame.image.load("recursos/assets/palmeiras.png").convert_alpha(),
-    pygame.image.load("recursos/assets/pao.png").convert_alpha(),
-    pygame.image.load("recursos/assets/rato.png").convert_alpha(),
-    pygame.image.load("recursos/assets/souza.png").convert_alpha(),
-    pygame.image.load("recursos/assets/televisao.png").convert_alpha()
+    pygame.image.load(caminho_recurso("recursos/assets/cabeloDeBoneca.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/cassio.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/corinthians.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/estudo.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/palmeiras.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/pao.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/rato.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/souza.png")).convert_alpha(),
+    pygame.image.load(caminho_recurso("recursos/assets/televisao.png")).convert_alpha()
 ]
 objetos_queda_imgs = [pygame.transform.scale(img, (80, 80)) for img in objetos_queda_imgs]
 comando_reconhecido = None
@@ -130,7 +137,8 @@ def boas_vindas(nome):
     while mostrando:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
-                quit()
+                pygame.quit()
+                sys.exit()
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 if rect_botao.collidepoint(evento.pos):
                     clicando = True
@@ -145,7 +153,8 @@ def boas_vindas(nome):
                 mostrando = False
             elif "sair" in comando_reconhecido:
                 fade(tela, modo='out')
-                quit()
+                pygame.quit()
+                sys.exit()
 
         tela.fill(preto)
         tela.blit(fundoBoasVindas, (0, 0))
@@ -295,7 +304,8 @@ def jogar():
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
-                quit()
+                pygame.quit()
+                sys.exit()
             elif evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_SPACE:
                     pausado = not pausado
@@ -372,7 +382,8 @@ def start():
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
-                quit()
+                pygame.quit()
+                sys.exit()
 
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 if rect_start.collidepoint(evento.pos):
@@ -386,7 +397,8 @@ def start():
                     jogar()
                 elif clicando_quit and rect_quit.collidepoint(evento.pos):
                     fade(tela, modo='out')
-                    quit()
+                    pygame.quit()
+                    sys.exit()
                 clicando_start = False
                 clicando_quit = False
 
@@ -442,7 +454,8 @@ def dead(nome, pontos):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 fade(tela, modo='out')
-                quit()
+                pygame.quit()
+                sys.exit()
             elif evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_RETURN:
                     fade(tela, modo='out')
